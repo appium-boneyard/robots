@@ -96,14 +96,15 @@ sync( function() {
   var newPoint;
   console.log("Determining Directions");
 
-  console.log("-x direction");
-  findPoint(-50,0);
   console.log("+x direction");
   findPoint(50,0);
-  console.log("-y direction");
-  findPoint(0,-50);
   console.log("+y direction");
   findPoint(0,50);
+  console.log("-x direction");
+  findPoint(-50,0);
+  console.log("-y direction");
+  findPoint(0,-50);
+  /*
   console.log("x,y corner");
   findPoint(50,50);
   console.log("x,-y corner");
@@ -112,6 +113,7 @@ sync( function() {
   findPoint(-50,50);
   console.log("-x,-y corner");
   findPoint(-50,-50);
+  */
 
   console.log("FINAL DATA");
   console.log(data);

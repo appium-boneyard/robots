@@ -5,7 +5,26 @@ var application_root = __dirname
   , express = require("express")
   , path = require("path")
   , five = require("johnny-five")
-  , kinematics = require("./kinematics");
+  , kinematics = require("./kinematics")
+  , fs = require("fs")
+  , ArgumentParser = require('argparse').ArgumentParser
+  , calibration = { isSet: false };
+
+// install sylvester
+eval(fs.readFileSync(path.resolve(__dirname, "sylvester.js"), "utf8"));
+
+var parser = new ArgumentParser({
+  version: '0.0.1',
+  addHelp:true,
+  description: 'Bitbeambot Calibration Script'
+});
+parser.addArgument(
+  [ '-c', '--calibration' ],
+  {
+    help: 'file to load calibration data from'
+  }
+);
+var args = parser.parseArgs();
 
 var board = new five.Board({ debug: false});
 board.on("ready", function() {
@@ -32,6 +51,20 @@ board.on("ready", function() {
   servo1.on("error", function () { console.log(arguments); });
   servo2.on("error", function () { console.log(arguments); });
   servo3.on("error", function () { console.log(arguments); });
+
+  // Load Calibration Data
+  if (fs.existsSync(args.calibration)) {
+    var calData = eval(fs.readFileSync(args.calibration, "utf8"));
+    calibration.center = calData[0];
+    var x1 = calData[1];
+    var y1 = calData[2];
+    var xScale = 50.0;
+    var yScale = 50.0;
+    calibration.xNormal = [(x1.coordinates[0] - calibration.center.coordinates[0]) / xScale,  (x1.coordinates[1] - calibration.center.coordinates[1]) / xScale];
+    calibration.yNormal = [(y1.coordinates[0] - calibration.center.coordinates[0]) / yScale, (y1.coordinates[1] - calibration.center.coordinates[1]) / yScale];
+    calibration.matrix = $M ([[calibration.xNormal[0], calibration.xNormal[1]],[calibration.yNormal[0], calibration.yNormal[1]]]);
+    calibration.isSet = true;
+  }
 
   getPositionForAngles = function(t1,t2,t3) {
     var points = kinematics.delta_calcForward(t1,t2,t3);
@@ -66,6 +99,19 @@ board.on("ready", function() {
     return getPositionForAngles(servo1Angle,servo2Angle,servo3Angle);
   };
 
+  convertCoordinatesToPosition = function(x,y) {
+    var invCalMatrix = calibration.matrix.inverse();
+    var deltaX = x - calibration.center.coordinates[0];
+    var deltaY = y - calibration.center.coordinates[1];
+    var coordMatrix = $M([[deltaX,deltaY]]);
+    return coordMatrix.multiply(invCalMatrix).elements[0];
+  };
+
+  convertPositionToCoordinates = function(x,y) {
+    var posMatrix = $M([[x,y]]);
+    return posMatrix.multiply(calibration.matrix).elements[0];
+  };
+
   // launch rest server
   var app = express();
 
@@ -89,7 +135,6 @@ board.on("ready", function() {
   });
 
   app.post('/setAngles', function (req, res){
-    var product;
     console.log("POST " + req.url + ": ");
     console.log(req.body);
     var theta1 = parseFloat(req.body.theta1);
@@ -100,7 +145,6 @@ board.on("ready", function() {
   });
 
   app.post('/setPosition', function (req, res){
-    var product;
     console.log("POST " + req.url + ": ");
     console.log(req.body);
     var x = parseFloat(req.body.x);
@@ -111,15 +155,27 @@ board.on("ready", function() {
   });
 
   app.get('/angles', function (req, res){
-    var product;
     console.log("GET " + req.url + ": ");
     return res.send(currentAngles());
   });
 
   app.get('/position', function (req, res){
-    var product;
     console.log("GET " + req.url + ": ");
     return res.send(currentPosition());
+  });
+
+  app.get('/positionForCoordinates/x/:x/y/:y', function (req, res){
+    console.log("GET " + req.url + ": ");
+    var x = parseFloat(req.params.x);
+    var y = parseFloat(req.params.y);
+    return res.send(convertCoordinatesToPosition(x,y));
+  });
+
+  app.get('/coordinatesForPosition/x/:x/y/:y', function (req, res){
+    console.log("GET " + req.url + ": ");
+    var x = parseFloat(req.params.x);
+    var y = parseFloat(req.params.y);
+    return res.send(convertPositionToCoordinates(x,y));
   });
 
   app.listen(4242);

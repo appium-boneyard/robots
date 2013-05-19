@@ -27,6 +27,18 @@ exports.client = function(address, port) {
     setPosition : function(x, y, z) {
       request.post(this.url('/setPosition'), {form:{x:x, y:y, z:z}});
     },
+    positionForCoordinates : function(x,y) {
+      var xmlHttp = new XMLHttpRequest();
+      xmlHttp.open( "GET", this.url('/positionForCoordinates/x/' + x + "/y/" + y), false );
+      xmlHttp.send( null );
+      return eval(xmlHttp.responseText);
+    },
+    coordinatesForPosition : function(x,y) {
+      var xmlHttp = new XMLHttpRequest();
+      xmlHttp.open( "GET", this.url('/coordinatesForPosition/x/' + x + "/y/" + y), false );
+      xmlHttp.send( null );
+      return eval(xmlHttp.responseText);
+    },
     reset : function() {
       var xmlHttp = new XMLHttpRequest();
       xmlHttp.open( "GET", this.url('/reset'), false );
