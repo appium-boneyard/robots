@@ -7,5 +7,7 @@ To launch the Robot Calibration App:
 `appium --udid [udid here] --app Appium.RobotCalibration --pre-launch`
 
 To calibrate a bitbeambot:
-`node calibrate.js -o calibration.json`
+`node calibrate.js -o /path/to/save/calibration.json`
 
+To launch a calibrated bitbeambot:
+`node server.js -c /path/to/calibration.json`
