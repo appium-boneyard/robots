@@ -1,0 +1,36 @@
+{
+  "name": "appium-robots",
+  "description": "Robots for Appium.",
+  "tags": [
+    "robots",
+    "automation",
+    "javascript"
+  ],
+  "version": "0.0.1",
+  "author": "appium-discuss@googlegroups.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/appium/robots.git"
+  },
+  "bugs": {
+    "url": "https://github.com/appium/robots/issues"
+  },
+  "engines": [
+    "node"
+  ],
+  "main": "./server.js",
+  "dependencies": {
+    "express": "~3.0.6",
+    "grunt": "~0.4.0",
+    "grunt-cli": "~0.1.6",
+    "argparse": "~0.1.10",
+    "path": "~0.4.9",
+    "temp": "~0.5.0",
+    "request": "~2.12.0",
+    "win-spawn" : "~1.1.1",
+    "johnny-five": "git://github.com/rwldrn/johnny-five.git",
+    "wd-sync" : "~1.0.1",
+    "xmlhttprequest" : "~1.5.0",
+    "sleep" : "~1.1.0"
+  }
+}
