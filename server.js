@@ -21,7 +21,7 @@ var parser = new ArgumentParser({
   description: 'Robot Calibration Script'
 });
 parser.addArgument(
-  [ '-c', '--calibration-file'], {
+  [ '-c', '--calibration'], {
     help: 'file to load calibration data from'
   });
 parser.addArgument(
@@ -95,13 +95,13 @@ board.on("ready", function() {
   };
 
   setAngles = function(t1,t2,t3) {
+    console.log("Setting Angles:" + [t1,t2,t3]);
     servo1.move(t1);
     servo2.move(t2);
     servo3.move(t3);
     servo1Angle = t1;
     servo2Angle = t2;
     servo3Angle = t3;
-    console.log([t1,t2,t3]);
   };
 
   currentAngles = function() {
@@ -109,6 +109,7 @@ board.on("ready", function() {
   };
 
   setPosition = function(x,y,z) {
+    console.log("Setting Position:" + [x,y,z]);
     var angles = kinematics.delta_calcInverse(x,y,z);
     setAngles(angles[1], angles[2], angles[3]);
   };
@@ -143,7 +144,7 @@ board.on("ready", function() {
 
   app.get('/status', function (req, res) {
     console.log("GET " + req.url + ": ");
-    res.send('OK');
+    res.send('\"OK\"');
   });
 
   app.get('/reset', function (req, res) {
@@ -159,7 +160,7 @@ board.on("ready", function() {
     var theta2 = parseFloat(req.body.theta2);
     var theta3 = parseFloat(req.body.theta3);
     setAngles(theta1, theta2, theta3);
-    return res.send("OK");
+    return res.send("\"OK\"");
   });
 
   app.post('/setPosition', function (req, res){
@@ -169,7 +170,7 @@ board.on("ready", function() {
     var y = parseFloat(req.body.y);
     var z = parseFloat(req.body.z);
     setPosition(x, y, z);
-    return res.send("OK");
+    return res.send("\"OK\"");
   });
 
   app.get('/angles', function (req, res){
@@ -201,6 +202,20 @@ board.on("ready", function() {
     var x = parseFloat(req.params.x);
     var y = parseFloat(req.params.y);
     var pos = convertCoordinatesToPosition(x,y);
+    setTimeout(function() {
+      setPosition(pos[0], pos[1], calibration.center.position[2]*.8);
+      setTimeout(function() {
+        setPosition(pos[0], pos[1], calibration.center.position[2]*1.025);
+        setTimeout(function() {
+          setPosition(pos[0], pos[1], calibration.center.position[2]*.8);
+          setTimeout(function() {
+            setAngles(min, min, min);
+          }, 500);
+        }, 500);
+      }, 500);
+    }, 500);
+    return res.send("\"OK\"");
+    /*
     setPosition(pos[0], pos[1], calibration.center.position[2]*.8);
     sleep(1);
     setPosition(pos[0], pos[1], calibration.center.position[2]*1.1);
@@ -209,6 +224,7 @@ board.on("ready", function() {
     sleep(.5);
     setAngles(min, min, min);
     return res.send("OK");
+    */
   });
 
   app.listen(args.port);

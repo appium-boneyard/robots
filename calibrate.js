@@ -38,11 +38,23 @@ sync( function() {
 
   var getCoords = function() {
     try {
-      var value = browser.elementByTagName('staticText').text();
-      if (value !== undefined) {
-        return eval(value.replace("(","[").replace(")", "]"));
+      // disabled due to bug with appium where the label is not updating
+      // var value = browser.elementByTagName('staticText').text();
+      // if (value !== undefined) {
+      //  return eval(value.replace("(","[").replace(")", "]"));
+      //  }
+      //  return value;
+
+      // hack to find value since element.text is not updated
+      var coordRegex = /label[^\(,]+\((\d+\.*\d*),\s+(\d+\.*\d*)\)/ ;
+      var pageSource = browser.source();
+      if (coordRegex.test(pageSource)) {
+        var match = coordRegex.exec(pageSource);
+        return [ parseFloat(match[1]), parseFloat(match[2])];
       }
-      return value;
+      else {
+        return undefined;
+      }
     }
     catch(err) {
       return undefined;

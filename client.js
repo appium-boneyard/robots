@@ -44,6 +44,12 @@ exports.client = function(address, port) {
       xmlHttp.open( "GET", this.url('/reset'), false );
       xmlHttp.send( null );
       return eval(xmlHttp.responseText);
+    },
+    tap : function(x,y) {
+      var xmlHttp = new XMLHttpRequest();
+      xmlHttp.open( "GET", this.url('/tap/x/' + x + "/y/" + y), false );
+      xmlHttp.send( null );
+      return xmlHttp.responseText;
     }
   };
 
