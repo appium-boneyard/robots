@@ -8,24 +8,42 @@ var application_root = __dirname
   , kinematics = require("./kinematics")
   , fs = require("fs")
   , ArgumentParser = require('argparse').ArgumentParser
+  , sleep = require('sleep').sleep
   , calibration = { isSet: false };
 
 // install sylvester
 eval(fs.readFileSync(path.resolve(__dirname, "sylvester.js"), "utf8"));
 
+// parse arguments
 var parser = new ArgumentParser({
   version: '0.0.1',
   addHelp:true,
-  description: 'Bitbeambot Calibration Script'
+  description: 'Robot Calibration Script'
 });
 parser.addArgument(
-  [ '-c', '--calibration' ],
-  {
+  [ '-c', '--calibration-file'], {
     help: 'file to load calibration data from'
-  }
-);
+  });
+parser.addArgument(
+  ['-p', '--port'] , {
+    defaultValue: 4242
+    , required: false
+    , type: 'int'
+    , example: "4242"
+    , help: 'port to listen on'
+  });
+/*
+ parser.addArgument(
+ ['-a', '--address'], {
+ defaultValue: '127.0.0.1'
+ , required: false
+ , example: "127.0.0.1"
+ , help: 'IP Address to listen on'
+ });
+ */
 var args = parser.parseArgs();
 
+// fire up the robot
 var board = new five.Board({ debug: false});
 board.on("ready", function() {
   var servo1 = five.Servo({pin: 9});
@@ -178,6 +196,22 @@ board.on("ready", function() {
     return res.send(convertPositionToCoordinates(x,y));
   });
 
-  app.listen(4242);
+  app.get('/tap/x/:x/y/:y', function (req, res){
+    console.log("GET " + req.url + ": ");
+    var x = parseFloat(req.params.x);
+    var y = parseFloat(req.params.y);
+    var pos = convertCoordinatesToPosition(x,y);
+    setPosition(pos[0], pos[1], calibration.center.position[2]*.8);
+    sleep(1);
+    setPosition(pos[0], pos[1], calibration.center.position[2]*1.1);
+    sleep(.5);
+    setPosition(pos[0], pos[1], calibration.center.position[2]*.8);
+    sleep(.5);
+    setAngles(min, min, min);
+    return res.send("OK");
+  });
+
+  app.listen(args.port);
+  console.log("Robot listening on port " + args.port);
 
 });
