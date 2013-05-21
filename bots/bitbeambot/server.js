@@ -12,7 +12,7 @@ var application_root = __dirname
   , calibration = { isSet: false };
 
 // install sylvester
-eval(fs.readFileSync(path.resolve(__dirname, "sylvester.js"), "utf8"));
+eval(fs.readFileSync(path.resolve(__dirname, "../../lib/sylvester.js"), "utf8"));
 
 // parse arguments
 var parser = new ArgumentParser({
