@@ -202,29 +202,19 @@ board.on("ready", function() {
     var x = parseFloat(req.params.x);
     var y = parseFloat(req.params.y);
     var pos = convertCoordinatesToPosition(x,y);
-    setTimeout(function() {
+    setTimeout(function(res) {
       setPosition(pos[0], pos[1], calibration.center.position[2]*.8);
-      setTimeout(function() {
+      setTimeout(function(res) {
         setPosition(pos[0], pos[1], calibration.center.position[2]*1.025);
-        setTimeout(function() {
+        setTimeout(function(res) {
           setPosition(pos[0], pos[1], calibration.center.position[2]*.8);
-          setTimeout(function() {
+          setTimeout(function(res) {
             setAngles(min, min, min);
-          }, 500);
-        }, 500);
-      }, 500);
-    }, 500);
-    return res.send("\"OK\"");
-    /*
-    setPosition(pos[0], pos[1], calibration.center.position[2]*.8);
-    sleep(1);
-    setPosition(pos[0], pos[1], calibration.center.position[2]*1.1);
-    sleep(.5);
-    setPosition(pos[0], pos[1], calibration.center.position[2]*.8);
-    sleep(.5);
-    setAngles(min, min, min);
-    return res.send("OK");
-    */
+            res.send("\"OK\"");
+          }, 500, res);
+        }, 500, res);
+      }, 500, res);
+    }, 500, res);
   });
 
   app.listen(args.port);
