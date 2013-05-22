@@ -3,7 +3,7 @@ Appium Robots
 
 Robots are an add-on for appium that will send all touch actions through a robot instead of to the automation framework.
 
-1.) To launch a robot server choose a robot in the bots folder, for this example we will use bitbeambot.
+1.) To launch a robot server choose a robot in the bots folder, for this example we will use [Bitbeambot](http://bitbeam.org/).
     
 `cd bots/bitbeambot`
 
