@@ -5,15 +5,17 @@ var fs = require('fs')
   , sleep = require('sleep').sleep
   , ArgumentParser = require('argparse').ArgumentParser;
 
-var client = wdSync.remote("0.0.0.0", 4723)
+var client = wdSync.remote("127.0.0.1", 4723)
   , browser = client.browser
   , sync = client.sync;
+require('sylvester');
 
 var parser = new ArgumentParser({
   version: '0.0.1',
   addHelp:true,
   description: 'Bitbeambot Calibration Script'
 });
+
 parser.addArgument(
   [ '-o', '--output' ],
   {
@@ -22,6 +24,7 @@ parser.addArgument(
 );
 
 var args = parser.parseArgs();
+translationMatrix = $M([0]);
 
 sync( function() {
 
@@ -109,24 +112,25 @@ sync( function() {
   console.log("Determining Directions");
 
   console.log("+x direction");
-  findPoint(10,0);
+  findPoint(20,20);
   console.log("+y direction");
-  findPoint(0,10);
-  console.log("-x direction");
-  findPoint(-10,0);
-  console.log("-y direction");
-  findPoint(0,-10);
+  findPoint(-10,-15);
+  data.push(startingPosition[2]);
+  data.push(contactPoint.position[2]);
+  //console.log("-x direction");
+  //findPoint(-50,0);
+  //console.log("-y direction");
+  //findPoint(0,-50);
   /*
-  console.log("x,y corner");
-  findPoint(50,50);
-  console.log("x,-y corner");
-  findPoint(50,-50);
-  console.log("-x,y corner");
-  findPoint(-50,50);
-  console.log("-x,-y corner");
-  findPoint(-50,-50);
-  */
-
+   console.log("x,y corner");
+   findPoint(50,50);
+   console.log("x,-y corner");
+   findPoint(50,-50);
+   console.log("-x,y corner");
+   findPoint(-50,50);
+   console.log("-x,-y corner");
+   findPoint(-50,-50);
+   */
   console.log("FINAL DATA");
   console.log(data);
 

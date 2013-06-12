@@ -72,16 +72,33 @@ board.on("ready", function() {
 
   // Load Calibration Data
   if (fs.existsSync(args.calibration)) {
-    var calData = eval(fs.readFileSync(args.calibration, "utf8"));
-    calibration.center = calData[0];
-    var x1 = calData[1];
-    var y1 = calData[2];
-    var xScale = 10.0;
-    var yScale = 10.0;
-    calibration.xNormal = [(x1.coordinates[0] - calibration.center.coordinates[0]) / xScale,  (x1.coordinates[1] - calibration.center.coordinates[1]) / xScale];
-    calibration.yNormal = [(y1.coordinates[0] - calibration.center.coordinates[0]) / yScale, (y1.coordinates[1] - calibration.center.coordinates[1]) / yScale];
-    calibration.matrix = $M ([[calibration.xNormal[0], calibration.xNormal[1]],[calibration.yNormal[0], calibration.yNormal[1]]]);
-    calibration.isSet = true;
+    var data = eval(fs.readFileSync(args.calibration, "utf8"));
+    var b0x = data[1].position[0],
+      b0y = data[1].position[1],
+      b1x = data[2].position[0],
+      b1y = data[2].position[1];
+    var d0x = data[1].coordinates[0],
+      d0y = data[1].coordinates[1],
+      d1x = data[2].coordinates[0],
+      d1y = data[2].coordinates[1];
+
+    var M = $M([
+      [d0x, d0y, 1, 0],
+      [-d0y, d0x, 0, 1],
+      [d1x, d1y, 1, 0],
+      [-d1y, d1x, 0, 1]
+    ]);
+    var u = $M([
+      [b0x],
+      [b0y],
+      [b1x],
+      [b1y]
+    ]);
+    var MI = M.inverse();
+    translationMatrix = MI.multiply(u);
+    offZ = data[3];
+    onZ = data[4];
+
   }
 
   getPositionForAngles = function(t1,t2,t3) {
@@ -119,16 +136,14 @@ board.on("ready", function() {
   };
 
   convertCoordinatesToPosition = function(x,y) {
-    var invCalMatrix = calibration.matrix.inverse();
-    var deltaX = x - calibration.center.coordinates[0];
-    var deltaY = y - calibration.center.coordinates[1];
-    var coordMatrix = $M([[deltaX,deltaY]]);
-    return coordMatrix.multiply(invCalMatrix).elements[0];
-  };
+    var a = translationMatrix.elements[0][0],
+      b = translationMatrix.elements[1][0],
+      c = translationMatrix.elements[2][0],
+      d = translationMatrix.elements[3][0];
 
-  convertPositionToCoordinates = function(x,y) {
-    var posMatrix = $M([[x,y]]);
-    return posMatrix.multiply(calibration.matrix).elements[0];
+    yprime = a * x + b * y + c;
+    xprime = b * x - a * y + d;
+    return [xprime, yprime]
   };
 
   // launch rest server
@@ -190,24 +205,17 @@ board.on("ready", function() {
     return res.send(convertCoordinatesToPosition(x,y));
   });
 
-  app.get('/coordinatesForPosition/x/:x/y/:y', function (req, res){
-    console.log("GET " + req.url + ": ");
-    var x = parseFloat(req.params.x);
-    var y = parseFloat(req.params.y);
-    return res.send(convertPositionToCoordinates(x,y));
-  });
-
   app.get('/tap/x/:x/y/:y', function (req, res){
     console.log("GET " + req.url + ": ");
     var x = parseFloat(req.params.x);
     var y = parseFloat(req.params.y);
     var pos = convertCoordinatesToPosition(x,y);
     setTimeout(function(res) {
-      setPosition(pos[0], pos[1], calibration.center.position[2]*.8);
+      setPosition(pos[0], pos[1], offZ);
       setTimeout(function(res) {
-        setPosition(pos[0], pos[1], calibration.center.position[2]*1.025);
+        setPosition(pos[0], pos[1], onZ);
         setTimeout(function(res) {
-          setPosition(pos[0], pos[1], calibration.center.position[2]*.8);
+          setPosition(pos[0], pos[1], offZ);
           setTimeout(function(res) {
             setAngles(min, min, min);
             res.send("\"OK\"");

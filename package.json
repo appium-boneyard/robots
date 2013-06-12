@@ -31,6 +31,6 @@
     "johnny-five": "git://github.com/rwldrn/johnny-five.git",
     "wd-sync" : "~1.0.1",
     "xmlhttprequest" : "~1.5.0",
-    "sleep" : "~1.1.0"
+    "sylvester":"0.0.21"
   }
 }
