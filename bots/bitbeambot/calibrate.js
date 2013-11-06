@@ -2,7 +2,7 @@
 var fs = require('fs')
   , wdSync = require('wd-sync')
   , robot = require('./client').client("127.0.0.1","4242")
-  , sleep = require('sleep').sleep
+  , usleep = require('sleep').usleep
   , ArgumentParser = require('argparse').ArgumentParser;
 
 var client = wdSync.remote("127.0.0.1", 4723)
@@ -65,7 +65,7 @@ sync( function() {
 
     // reset position
     robot.reset();
-    sleep(1);
+    usleep(500000);
 
     // move above the point
     var newPoint = [contactPoint.position[0] + deltaX, contactPoint.position[1] + deltaY, contactPoint.position[2] *.87];
@@ -103,7 +103,7 @@ sync( function() {
   console.log(contactPoint);
   data.push(contactPoint);
   robot.reset();
-  sleep(.5);
+  usleep(500000);
 
   var newPoint;
   console.log("Determining Directions");

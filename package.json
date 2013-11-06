@@ -28,9 +28,10 @@
     "temp": "~0.5.0",
     "request": "~2.12.0",
     "win-spawn" : "~1.1.1",
-    "johnny-five": "git://github.com/rwldrn/johnny-five.git",
+    "johnny-five": "git://github.com/rwaldron/johnny-five.git",
     "wd-sync" : "~1.0.1",
     "xmlhttprequest" : "~1.5.0",
-    "sylvester":"0.0.21"
+    "sylvester":"0.0.21",
+    "sleep":"~1.1.2"
   }
 }
