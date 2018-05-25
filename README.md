@@ -1,6 +1,8 @@
 Appium Robots
 ======
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/appium/robots.svg)](https://greenkeeper.io/)
+
 Robots are an add-on for appium that will send all touch actions through a robot instead of to the automation framework.
 
 1.) To launch a robot server choose a robot in the bots folder, for this example we will use [Bitbeambot](http://bitbeam.org/).
